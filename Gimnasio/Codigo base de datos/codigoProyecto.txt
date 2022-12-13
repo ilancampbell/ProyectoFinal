@@ -1,0 +1,235 @@
+create database Gimnasio
+
+use Gimnasio
+
+create table Usuarios(
+Id_usuario int identity(10000,1) primary key,
+Email nvarchar(50)not null,
+Clave nvarchar(10)not null,
+Nombre nvarchar(50)not null,
+Tipo varchar(20)
+)
+insert into Usuarios values ('ilan@gmail.com','123','Ilan',null)
+insert into Usuarios values ('Marta@gmail.com','456','Marta',null)
+insert into Usuarios values ('grettel@gmail.com','678','grettel',null)
+insert into Usuarios values ('yazel@gmail.com','234','Yazel',null)
+
+select * from Usuarios
+
+create table Clientes(
+Id_clientes int identity(1,1) primary key,
+Nombre nvarchar(50)not null,
+Apellido nvarchar(50)not null,
+Telefono varchar(8) not null
+)
+insert into Clientes values ('Yazel','Ugarte','88446678')
+insert into clientes values ('Marta','Gonzales','98479285')
+insert into clientes values ('Grettel','Alpizar','89759823')
+
+select * from Clientes
+
+
+create table Direcciones(
+Id_direcciones int identity(1,1) primary key,
+Codigo_clientes int,
+Codigo_provincia int,
+Codigo_canton int,
+Codigo_distrito int,
+Comentarios varchar(200),
+constraint fk_id_clientes foreign key(Codigo_clientes) references Clientes(Id_clientes),
+constraint fk_id_provincia foreign key(Codigo_provincia) references Provincia(Id_provincia),
+constraint fk_id_canton foreign key(Codigo_canton) references Canton(Id_canton),
+constraint fk_id_distrito foreign key(Codigo_distrito) references Distrito(Id_distrito)
+)
+
+create table Mae_factura(
+Nfactura int identity(1000,100) primary key,
+Fecha date constraint Def_fecha default Getdate(),
+Id_cliente int,
+Total float,
+IV_total float,
+constraint fk_cliente foreign key(Id_cliente) references Clientes(Id_clientes)
+)
+
+Create table Det_factura(
+Id_factura int identity(1000,99) primary key,
+Nfactura int,
+Id_producto int,
+Cantidad float,
+Precio_unitario float,
+IV float,
+constraint fk_nfactura foreign key(Nfactura) references Mae_factura(Nfactura)
+)
+
+create table Provincia(
+Id_provincia int identity(1,1) primary key,
+Nombre nvarchar(50)
+)
+
+create table Canton(
+Id_canton int identity(1,1) primary key,
+Nombre nvarchar(50),
+Id_provincia int,
+constraint fk_provincia foreign key(Id_provincia) references Provincia(Id_provincia)
+)
+
+
+create table Distrito(
+Id_distrito int identity(1,1) primary key,
+Nombre nvarchar(50),
+Id_canton int,
+constraint fk_canton foreign key(Id_canton) references Canton(Id_canton)
+)
+
+create table Producto(
+Id_producto int identity(10,1) primary key,
+Nombre_producto nvarchar(50),
+Precio_producto float
+)
+insert into producto values (1,'camisa'),(2,'Pantalon')
+
+select * from producto
+
+alter procedure selecproducto
+@codigo int
+as 
+ begin 
+ select codigo, descripcion, precio from producto where codigo = @codigo
+ end
+
+
+exec MaeFactura 'miguel',2300
+
+SELECT TOP 1 ID FROM Mae_factura ORDER BY ID DESC
+SELECT TOP 1 * FROM Table ORDER BY ID DESC
+
+create procedure MaeFactura
+ 
+  @cliente varchar(20),
+  @total money
+  as 
+
+  begin
+  DECLARE @FECHA datetime
+  SET @fecha = GETDATE()
+    insert into mae_factura (fecha,Cliente,total) values (@FECHA,@cliente,@total)
+  
+  end
+
+  create procedure DetFactura
+
+  @linea int,
+  @codigo int,
+  @cantidad int,
+  @precio money
+  as 
+
+  begin
+    Declare @id int
+	set @id = (select top 1 id from Mae_factura order by id desc)
+    insert into det_factura (id,linea,codigo,cantidad,precio) values (@id,@linea,@codigo,@cantidad,@precio)
+  
+  end
+
+
+
+
+
+
+create table Rutinas(
+Id_rutinas int identity(1,1),
+Dia varchar(20),
+Ejercicio varchar(30),
+Repeticiones varchar(10)
+
+)
+
+/* PROCEDIMIENTOS ALMACENADOS PARA USUARIOS */  /*  Alter modifica*/
+
+
+create procedure ConsultarUsuario
+as
+  begin
+     select * from Usuarios
+  end
+
+  exec ConsultarUsuario
+
+
+  create procedure borrarUsuario
+  @Email nvarchar(50)
+as
+  begin
+     delete Usuarios where Email=@Email
+  end
+
+
+
+create procedure ValidarUsuario
+@Email nvarchar(50),
+@Clave nvarchar(10)
+as
+  begin
+     select * from Usuarios where Email=@Email and Clave=@Clave
+  end
+
+  exec ValidarUsuario 'Ilan@gmail.com', '123'
+
+
+  
+  create procedure IngresarUsuario
+@Email nvarchar(50),
+@Clave nvarchar(10),
+@Nombre nvarchar(50),
+@Tipo varchar(20)= 'Regular'
+as
+begin
+    insert into Usuarios (Email,Clave,Nombre,Tipo) values (@Email,@Clave,@Nombre,@Tipo)
+end
+
+ exec IngresarUsuario 'Jose@gmail.com','890','Jose'
+
+
+
+ create procedure ActualizarUsuario
+@Email nvarchar(50),
+@Clave nvarchar(10),
+@Nombre nvarchar(50),
+@Tipo varchar(20)= 'Regular'
+as
+begin
+    update Usuarios set Clave=@Clave,Nombre=@Nombre,tipo=@Tipo where email=@email
+end
+
+/* PROCEDIMIENTOS ALMACENADOS PARA Clientes */
+
+create procedure IngresarCliente
+@nombre nvarchar(50),
+@apellido nvarchar(50),
+@telefono varchar(8)
+as
+begin
+    insert into Clientes(Nombre,Apellido,Telefono) values (@Nombre,@Apellido,@Telefono)
+end
+exec IngresarCliente 'Uru','djf','47466'
+
+
+ alter procedure ConsultarCliente
+as
+begin
+    select * from CLientes 
+end
+exec  ConsultarCliente 
+
+
+
+create procedure borrarCliente
+ 
+@Nombre nvarchar(50)
+as
+  begin
+     delete Clientes where nombre=@Nombre
+  end
+
+  exec borrarCliente 'Pedro'
+  exec  ConsultarCliente 
